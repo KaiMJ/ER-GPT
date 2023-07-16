@@ -1,0 +1,4 @@
+Input:
+"Build an SAP architecture on AWS with multi-cloud deployment for redundancy and vendor flexibility."
+Edit:
+"Include a non-SAP data outside of virtual private cloud."
