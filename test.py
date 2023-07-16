@@ -39,7 +39,7 @@ model = ER_GPT()
 
 states = json.load(open("states.json", "r"))
 
-st.text_input(states["input_prompt"], key="input")
+user_input = st.text_input(states["input_prompt"], key="input")
 
 
 def click_confirm():
@@ -49,20 +49,20 @@ def click_confirm():
 
         with st.spinner("Editing diagram..."):
             done = False
-            attempt = 0
             print(f"Attempt {states['attempt']}: Editing diagram")
 
-            while not done or states["attempt"] < 3:
+            while not done and states["attempt"] < 2:
                 try:
                     edit_result = model.step_4(
                         st.session_state["input"], states["code"]
                     )
                     done = True
-                except:
+                except Exception as e:
+                    print(e)
                     states["attempt"] += 1
                     with open("states.json", "w") as f:
                         json.dump(states, f)
-                attempt += 1
+
             if not done:
                 st.error("Model failed to edit diagram. Please rerun")
             else:
@@ -73,23 +73,22 @@ def click_confirm():
     else:
         print("This should be first run")
         states["input_prompt"] = "Edit the Enterprise Architecture diagram"
-        # time.sleep(5)
+
         with st.spinner("Generating diagram..."):
             done = False
-            attempt = 1
 
-            while not done or states["attempt"] < 3:
+            while not done and states["attempt"] < 2:
                 print(f"Attempt {states['attempt']}: Generating diagram")
                 try:
                     architecture_result = model.step_1(st.session_state["input"])
                     diagram_result = model.step_2(architecture_result)
                     code_result = model.step_3(diagram_result)
                     done = True
-                except:
+                except Exception as e:
+                    print(e)
                     states["attempt"] += 1
                     with open("states.json", "w") as f:
                         json.dump(states, f)
-                attempt += 1
 
             if not done:
                 st.error("Model failed to edit diagram. Please rerun")
@@ -116,19 +115,8 @@ def click_reset():
         json.dump(states, f)
 
 
-confirm_button = st.button("Confirm", on_click=click_confirm)
+st.button("Confirm", on_click=click_confirm)
 if states["next_run"]:
     if states["code"] != "":
         st.image(Image.open("diagram.png"), width=600)
-    reset_button = st.button("Reset", on_click=click_reset)
-
-
-# if confirm_button:
-#     print(confirm_button)
-#     if states.get("next_run"):
-
-
-# if reset_button:
-
-#     with open("states.json", "w") as f:
-#         json.dump({}, f)
+    st.button("Reset", on_click=click_reset)
