@@ -9,6 +9,7 @@ from PIL import Image
 import time
 import openai
 
+max_attempt = 5
 load_dotenv()
 sideb = st.sidebar
 OPENAPI_KEY = sideb.text_input(
@@ -24,6 +25,10 @@ def is_api_key_valid():
             response = openai.Completion.create(
                 engine="davinci", prompt="Test", max_tokens=1
             )
+            with open("default_state.json", "r") as source_file:
+                source_data = json.load(source_file)
+            with open("states.json", "w") as destination_file:
+                json.dump(source_data, destination_file)
             return True
     except:
         return False
@@ -51,7 +56,7 @@ def click_confirm():
             done = False
             print(f"Attempt {states['attempt']}: Editing diagram")
 
-            while not done and states["attempt"] < 2:
+            while not done and states["attempt"] < max_attempt:
                 try:
                     edit_result = model.step_4(
                         st.session_state["input"], states["code"]
@@ -77,7 +82,7 @@ def click_confirm():
         with st.spinner("Generating diagram..."):
             done = False
 
-            while not done and states["attempt"] < 2:
+            while not done and states["attempt"] < max_attempt:
                 print(f"Attempt {states['attempt']}: Generating diagram")
                 try:
                     architecture_result = model.step_1(st.session_state["input"])
@@ -97,11 +102,10 @@ def click_confirm():
 
         states["attempt"] = 0
 
-    st.session_state["input"] = ""
     states["next_run"] = True
-
     with open("states.json", "w") as f:
         json.dump(states, f)
+    st.session_state["input"] = ""
 
 
 def click_reset():

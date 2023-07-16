@@ -17,6 +17,7 @@ import openai
 
 class ER_GPT:
     def __init__(self):
+        self.temperature = 0
         pass
 
     # Step 1, get the architecture components
@@ -61,7 +62,7 @@ class ER_GPT:
                 }
             ],
             function_call={"name": "get_architecture_components"},
-            temperature=1,
+            temperature=self.temperature,
         )
         architecture_result = completion.choices[0].message.function_call.arguments
         print(architecture_result)
@@ -104,7 +105,7 @@ class ER_GPT:
                 }
             ],
             function_call={"name": "get_diagram_instruction"},
-            temperature=1,
+            temperature=self.temperature,
         )
         diagram_result = completion.choices[0].message.function_call.arguments
         print(diagram_result)
@@ -148,7 +149,7 @@ class ER_GPT:
                 }
             ],
             function_call={"name": "get_python_code_for_diagram"},
-            temperature=1,
+            temperature=self.temperature,
         )
         code_result = completion.choices[0].message.function_call.arguments
         code_result = json.loads(code_result, strict=False)["code"]
@@ -193,7 +194,7 @@ class ER_GPT:
                 }
             ],
             function_call={"name": "get_python_code_for_diagram"},
-            temperature=1,
+            temperature=self.temperature,
         )
         edit_result = completion.choices[0].message.function_call.arguments
         edit_result = json.loads(edit_result, strict=False)["code"]
